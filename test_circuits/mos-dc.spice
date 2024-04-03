@@ -1,0 +1,33 @@
+MOSFET DC Characteristics Chart
+
+*sweeping voltage sources
+Vg	1	gnd	0
+Vd	2	gnd	0
+*voltage controlled voltage sources (E-type)
+E_ng	ng	gnd	1	gnd	1
+E_nd	nd	gnd	2	gnd	1
+E_pg	pg	gnd	1	gnd	-1
+E_pd	pd	gnd	2	gnd	-1
+*nmos
+M1	nd	ng	gnd	gnd	NMOS	W=0.2u	L=0.1u
+*pmos
+M2	gnd	pg	pd	pd	PMOS	W=0.2u	L=0.1u	
+
+* use BSIM4 model with default parameters
+.model NMOS nmos level=54 version=4.8
+.model PMOS pmos level=54 version=4.8
+
+*------------------------------------------------
+* DC Sweeping format differs in different kind SPICE
+*------------------------------------------------
+*.dc Vd 0 3.0 0.05 SWEEP Vg 0 1.8 0.3
+* Change the above line to Ngspice compatible below
+.dc Vd 0 3.0 0.05 Vg 0 1.8 0.3
+
+* Plot NMOS and PMOS drain currents in one chart as,
+*.plot -e_nd#branch e_pd#branch
+
+* Compare NMOS/PMOS driving capabilities
+* and point out short channel effects (SCEs) on curves
+* such as CLM, DIBL, SCBE, ...
+.end
