@@ -26,17 +26,24 @@ print(imgData)
 grid_size = 4  # this number defines the coarseness of resistor mesh
 mesh_xsize = math.ceil(img_xsize / grid_size)  # mesh X/Y down-sized
 mesh_ysize = math.ceil(img_ysize / grid_size)  # ysize for mesh row number
-meshDots = numpy.zeros([mesh_ysize, mesh_xsize])  # dot marks metal area
 
 # down-sample input image to fill the mesh array
-n = 0
-for j in range(0, img_ysize, grid_size):
-    m = 0
-    for i in range(0, img_xsize, grid_size):
-        if imgData[j][i] != 0:
-            meshDots[n][m] = 1
-        m += 1
-    n += 1
+# The 10 lines below are detailed array element operations,
+# where array meshDots[] marks the metal area (1/0)
+#meshDots = numpy.zeros([mesh_ysize, mesh_xsize])
+#n = 0
+#for j in range(0, img_ysize, grid_size):
+#    m = 0
+#    for i in range(0, img_xsize, grid_size):
+#        if imgData[j][i] != 0:
+#            meshDots[n][m] = 1
+#        m += 1
+#    n += 1
+# These operations above can also be based on NumPy's internal
+# down-sampling and mapping method, as in the 2 lines below
+binary_mapVec = numpy.vectorize(lambda x: 1 if x != 0 else 0)
+meshDots = binary_mapVec(imgData[::grid_size, ::grid_size])
+
 print(meshDots)
 
 # create a SPICE compatible netlist for DC simulation
