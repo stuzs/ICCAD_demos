@@ -7,7 +7,6 @@ passed to another demo program iccad_mna.py.
 """
 
 import sys
-import numpy as np
 import math
 import os
 import re
@@ -33,6 +32,10 @@ def I_eq(V_d):
 
 
 class Newton:
+    """
+    A Newton Iteration object who has iteration storages and
+    calculation methods
+    """
     inputFileName = ""  # circuit file name
     parseReady = False
     found_diodes = []  # diode cards in the circuit
@@ -85,7 +88,7 @@ class Newton:
             self.parseReady = True
 
     def reportStatus(self):
-        if self.parseReady == True:
+        if self.parseReady is True:
             print(self.found_diodes)
             print(self.non_diode_lines)
             print(self.equ_diode_lines)
@@ -93,7 +96,7 @@ class Newton:
             print(self.node_volt_iter1)
 
     def initGuess(self):
-        if self.parseReady != True:
+        if self.parseReady is not True:
             return
         # guess all diodes working on a predefined initial value
         self.equ_diode_lines = []
@@ -124,7 +127,7 @@ class Newton:
                     node_volt_dic[n_name] = float(n_volt)  # save voltage
 
     def continueGuess(self):
-        if self.parseReady != True:
+        if self.parseReady is not True:
             return
         # apply all diodes's Vd from Iter0 dictionary
         self.equ_diode_lines = []
@@ -164,25 +167,25 @@ littleNewton.initGuess()
 littleNewton.createLinearFile(SPICE_net0)
 ret_code = littleNewton.runMNAnalysis(SPICE_net0, SPICE_out0)
 if ret_code != 0:
-    exit(ret_code)
+    sys.exit(ret_code)
 littleNewton.readbackNodeResult(SPICE_out0, littleNewton.node_volt_iter0)
 # End of initial guess
 
 iterNum = 0
-while (True):
+while True:
     littleNewton.continueGuess()
     littleNewton.createLinearFile(SPICE_net1)
     ret_code = littleNewton.runMNAnalysis(SPICE_net1, SPICE_out1)
     if ret_code != 0:
-        exit(ret_code)
+        sys.exit(ret_code)
     littleNewton.readbackNodeResult(SPICE_out1, littleNewton.node_volt_iter1)
     iterNum += 1
     if littleNewton.judgeConverged():
         print("Converged after", iterNum, "times. See result in", SPICE_out1)
         break
-    elif iterNum > 100:
+    if iterNum > 100:
         print("Not converged after too many iterations!")
-        exit(False)
+        sys.exit(False)
 
     # save this iteration's node voltage dictionary for next comparison
     littleNewton.node_volt_iter0 = littleNewton.node_volt_iter1.copy()

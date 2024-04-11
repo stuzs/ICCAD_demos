@@ -6,11 +6,12 @@ from the voltage outputs calculates current out-flowing from each node.
 A mesh voltage graph and a mesh current density graph are then plotted.
 """
 
-from PIL import Image
-import numpy
+import sys
 import math
 import os
 import re
+import numpy
+from PIL import Image
 import matplotlib.pyplot as plt
 
 # I drew two images by GIMP, but other image tool should be fine
@@ -77,7 +78,7 @@ f.close()
 # run circuit simulator (SPICE) for all node voltages
 ret_code = os.system("python ../iccad_mna.py resmesh.spice > meshvolt.out")
 if ret_code != 0:
-    exit(ret_code)
+    sys.exit(ret_code)
 
 # after running SPICE, read back SPICE outputs and sum the out-flowing
 # currents from each node and plot this sum (current densities) to
@@ -87,10 +88,10 @@ if ret_code != 0:
 meshVolt = numpy.zeros([mesh_ysize, mesh_xsize])
 with open("./meshvolt.out") as fmv:
     for line in fmv.readlines():
-        if re.match('^node N_\d+_\d+', line):
+        if re.match(r'^node N_\d+_\d+', line):
             node_args = re.split(' ', line)
-            nl = re.findall('\d+', node_args[1])
-            volt = re.search('[^V]+', node_args[2])
+            nl = re.findall(r'\d+', node_args[1])
+            volt = re.search(r'[^V]+', node_args[2])
             meshVolt[int(nl[1])][int(nl[0])] = volt.group()
 
 # 'with' automatically takes care of closing file after its block

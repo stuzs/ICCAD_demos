@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""For demonstrating DC analysis of linear circuit using both 
+"""For demonstrating DC analysis of linear circuit using both
 Nodal Analysis(NA) and Modified Nodal Analysis(MNA) methods.
 NumPy is used for matrix operation.
 """
@@ -13,10 +13,10 @@ import numpy as np
 def isnotGround(node_name):
     """Is the node_name not an alias of Ground?
     """
-    return bool(node_name != '0' and node_name != 'GND')
+    return bool(node_name not in ('0', 'GND'))
 
 
-class Component(object):
+class Component():
     """Component is a class, which has 4 class members for
        each circuit component: name, pNode, nNode and value
        ---
@@ -29,9 +29,9 @@ class Component(object):
         self.nNode = negativeNode
         self.value = value
 
-    def matrixFill(self, G, B, vectorI, vectorE):
-        """Fill matrices G and vectorI, according to self's value.
-           If self is a voltage source, B and vectorE are filled.
+    def matrixFill(self, matG, matB, vecI, vecE):
+        """Fill matrices matG and vecI, according to self's value.
+           If self is a voltage source, matB and vecE are filled.
         """
         # what if value is a complex number?
         value = float(self.value)
@@ -51,28 +51,28 @@ class Component(object):
 
         if self.name.startswith('R'):  # Resistor handling
             if isnotGround(self.pNode) and isnotGround(self.nNode):
-                G[nP][nP] += 1 / value
-                G[nN][nN] += 1 / value
-                G[nP][nN] -= 1 / value
-                G[nN][nP] -= 1 / value
+                matG[nP][nP] += 1 / value
+                matG[nN][nN] += 1 / value
+                matG[nP][nN] -= 1 / value
+                matG[nN][nP] -= 1 / value
             elif isnotGround(self.pNode):
-                G[nP][nP] += 1 / value
+                matG[nP][nP] += 1 / value
             elif isnotGround(self.nNode):
-                G[nN][nN] += 1 / value
+                matG[nN][nN] += 1 / value
 
         if self.name.startswith('I'):  # Current source handling
             if isnotGround(self.pNode):
-                vectorI[nP][0] -= value
+                vecI[nP][0] -= value
             if isnotGround(self.nNode):
-                vectorI[nN][0] += value
+                vecI[nN][0] += value
 
         if self.name.startswith('V'):  # Voltage source handling
             nV = int(vsrcDict[self.name])
-            vectorE[nV][0] = value
+            vecE[nV][0] = value
             if isnotGround(self.pNode):
-                B[nP][nV] = 1
+                matB[nP][nV] = 1
             if isnotGround(self.nNode):
-                B[nN][nV] = -1
+                matB[nN][nV] = -1
 
 
 # First, read in circuit file name in command line
