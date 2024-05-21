@@ -1,4 +1,6 @@
-2-input AND Gate Cell Characterization Demo
+* 2-input AND Gate Cell Characterization Demo
+* This file is for understanding the very basic idea of cell
+* charaterization. It has no dependency on other files.
 
 .SUBCKT AND2 in1 in2 out VDD
 * NODES: INPUT, INPUT, OUTPUT, VCC
@@ -20,9 +22,10 @@ M6 out net1 0 0 n1 W=0.21u L=0.05u
 .model n1 nmos level=54 version=4.8.0
 .model p1 pmos level=54 version=4.8.0
 
-* define the 2D-LUT index values,
-* try changing parameter values in batch runs
-.param slope=0.2NS
+* define one group set of 2D-LUT index values, and would change
+* these parameters according to some realistic parameter combinations
+* in automatic batch runs
+.param slope=0.01NS
 .param cap=10ff
 
 VCC 4 0 DC 1.1V
