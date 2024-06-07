@@ -173,9 +173,9 @@ with open(netlistFile) as netlist:
 
     # Output the result below. Would you try to sort them?
     for node in nodeDict.keys():
-        print("node %s: %.6fV" % (node, Result[nodeDict[node]]))
+        print("node %s: %.6fV" % (node, Result[nodeDict[node], 0]))
 
     if usingMNA:
         print("------")
         for vsrc in vsrcDict.keys():
-            print("vsource %s: %.6fA" % (vsrc, Result[vsrcDict[vsrc] + N]))
+            print("vsource %s: %.6fA" % (vsrc, Result[vsrcDict[vsrc] + N, 0]))
