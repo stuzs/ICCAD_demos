@@ -1,0 +1,22 @@
+* Sub-circuit of an AND2 Gate with its BSIM4 MOSFET model
+* The AND2 is actually built up by an NAND2 followed by an inverter.
+* The pin "in2"(pin B) of the NAND2's pull-up transistor is set to be
+* quite weak in this cell, which slows down in2's falling (due to INV)
+* characteristics.
+.SUBCKT AND2 in1 in2 out VDD
+* NODES: INPUT, INPUT, OUTPUT, VCC
+* stage 1: PMOS VCC->M1//M2; NMOS M3--M4->GND
+*  in1(pin A) controls M1 and M3
+*  in2(pin B) controls M2 and M4
+* stage 2: PMOS M5; NMOS M6
+M1 net1 in1 Vdd Vdd p1 W=0.315u L=0.05u
+* M2 has a deliberately set narrow width
+M2 net1 in2 Vdd Vdd p1 W=0.15u L=0.05u
+M3 net1 in1 net2 0 n1 W=0.21u L=0.05u
+M4 0 in2 net2 0 n1 W=0.21u L=0.05u
+M5 Vdd net1 out Vdd p1 W=0.63u L=0.05u
+M6 out net1 0 0 n1 W=0.42u L=0.05u
+.ENDS AND2
+
+.model n1 nmos level=54 version=4.8.0
+.model p1 pmos level=54 version=4.8.0

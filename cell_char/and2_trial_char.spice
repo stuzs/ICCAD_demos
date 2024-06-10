@@ -1,0 +1,63 @@
+* 2-input AND Gate (AND2) Cell Characterization Demo
+* Before using alter method for batch running to generate 2-D NLDM timing
+* tables, try simulation on just one condition setting.
+
+* Add an invert as driver to imitate real input driving condition.
+* Add driver loading capacitance to imitate driver's fan-out.
+* Since the driving inverter will sharpen any slow input waveform, the
+* driver's load capacitance is used to control the slew rate on test signal.
+
+.include ./trial_and2_sckt.spice
+
+* define 3 parameters to control input waveform shape
+* define another 1 parameter for output load
+* all parameters changed during alterparam procedure
+.param vin_slope=0.1NS
+.param drv_load_cap=10fF
+.param drv_M=10
+.param out_load_cap=100fF
+
+* input pulse voltage source with 10-Ohms internal resistance
+VCC vcc 0 1.1V
+VIN vin 0 0 PULSE(1.1 0 0 {vin_slope} {vin_slope} 20NS 40NS)
+Rin vin drvin 10
+
+* an inverter as the input driver, {drv_M} defines the multiplicity factor
+M1 vcc drvin 1 vcc p1 W=0.63u L=0.05u M={drv_M}
+M2 1 drvin 0 0 n1 W=0.42u L=0.05u M={drv_M}
+* a capacitor as the driver's fanout
+Cdrvout 1 0 {drv_load_cap}
+
+*X1 for testing PIN A; node 1: input; node 2: output
+X1 1 vcc 2 vcc AND2
+CL1 2 0 {out_load_cap}
+
+*X2 for testing PIN B; node 1: input; node 3: output
+X2 vcc 1 3 vcc AND2
+CL2 3 0 {out_load_cap}
+
+*.tran 0.001n 100n
+*.save all
+
+.control
+tran 0.01n 100n
+run
+* define level 30%->70% propagation delay
+* and I choose the second rising edge and first falling edge to measure
+meas tran tr_in TRIG V(1) VAL=0.33 RISE=2 TARG V(1) VAL=0.77 RISE=2
+meas tran tf_in TRIG V(1) VAL=0.77 FALL=1 TARG V(1) VAL=0.33 FALL=1
+meas tran tr_out_Ain TRIG V(2) VAL=0.33 RISE=2 TARG V(2) VAL=0.77 RISE=2
+meas tran tr_out_Bin TRIG V(3) VAL=0.33 RISE=2 TARG V(3) VAL=0.77 RISE=2
+meas tran tf_out_Ain TRIG V(2) VAL=0.77 FALL=1 TARG V(2) VAL=0.33 FALL=1
+meas tran tf_out_Bin TRIG V(3) VAL=0.77 FALL=1 TARG V(3) VAL=0.33 FALL=1
+meas tran tpdr_Ain TRIG V(1) VAL=0.55 RISE=2 TARG V(2) VAL=0.55 RISE=2
+meas tran tpdr_Bin TRIG V(1) VAL=0.55 RISE=2 TARG V(3) VAL=0.55 RISE=2
+meas tran tpdf_Ain TRIG V(1) VAL=0.55 FALL=1 TARG V(2) VAL=0.55 FALL=1
+meas tran tpdf_Bin TRIG V(1) VAL=0.55 FALL=1 TARG V(3) VAL=0.55 FALL=1
+plot v(1) v(2) v(3)
+echo ""
+echo "Type "quit" to quit SPICE"
+echo ""
+.endc
+
+.end

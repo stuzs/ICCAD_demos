@@ -1,0 +1,64 @@
+* Sub-circuits of linked AND2 gates as a chain
+
+* load a capacitor every interval of 10 gates 
+* but only use this parameter and Cextra below
+* when in evaluating different chain structures
+* .param every_10gates_cap=10fF
+
+* 10 AND2 gates, with in1->out long chain
+.SUBCKT AND2C10A in1 in2 out VDD
+XA0 in1 in2 out1 VDD AND2
+XA1 out1 in2 out2 VDD AND2
+XA2 out2 in2 out3 VDD AND2
+XA3 out3 in2 out4 VDD AND2
+XA4 out4 in2 out5 VDD AND2
+XA5 out5 in2 out6 VDD AND2
+XA6 out6 in2 out7 VDD AND2
+XA7 out7 in2 out8 VDD AND2
+XA8 out8 in2 out9 VDD AND2
+XA9 out9 in2 out VDD AND2
+Cextra out GND {every_10gates_cap}
+.ENDS AND2C10
+
+* 10 AND2 gates, with in2->out long chain
+.SUBCKT AND2C10B in1 in2 out VDD
+XB0 in1 in2 out1 VDD AND2
+XB1 in1 out1 out2 VDD AND2
+XB2 in1 out2 out3 VDD AND2
+XB3 in1 out3 out4 VDD AND2
+XB4 in1 out4 out5 VDD AND2
+XB5 in1 out5 out6 VDD AND2
+XB6 in1 out6 out7 VDD AND2
+XB7 in1 out7 out8 VDD AND2
+XB8 in1 out8 out9 VDD AND2
+XB9 in1 out9 out VDD AND2
+Cextra out GND {every_10gates_cap}
+.ENDS AND2C10B
+
+* 100 AND2 gates, with in1->out long chain
+.SUBCKT AND2C100A in1 in2 out VDD
+X10A0 in1 in2 out1 VDD AND2C10A
+X10A1 out1 in2 out2 VDD AND2C10A
+X10A2 out2 in2 out3 VDD AND2C10A
+X10A3 out3 in2 out4 VDD AND2C10A
+X10A4 out4 in2 out5 VDD AND2C10A
+X10A5 out5 in2 out6 VDD AND2C10A
+X10A6 out6 in2 out7 VDD AND2C10A
+X10A7 out7 in2 out8 VDD AND2C10A
+X10A8 out8 in2 out9 VDD AND2C10A
+X10A9 out9 in2 out VDD AND2C10A
+.ENDS AND2C100A
+
+* 100 AND2 gates, with in2->out long chain
+.SUBCKT AND2C100B in1 in2 out VDD
+X10B0 in1 in2 out1 VDD AND2C10B
+X10B1 in1 out1 out2 VDD AND2C10B
+X10B2 in1 out2 out3 VDD AND2C10B
+X10B3 in1 out3 out4 VDD AND2C10B
+X10B4 in1 out4 out5 VDD AND2C10B
+X10B5 in1 out5 out6 VDD AND2C10B
+X10B6 in1 out6 out7 VDD AND2C10B
+X10B7 in1 out7 out8 VDD AND2C10B
+X10B8 in1 out8 out9 VDD AND2C10B
+X10B9 in1 out9 out VDD AND2C10B
+.ENDS ANDC100B

@@ -1,0 +1,30 @@
+Ring Oscillator made of 100 AND2 gates plus an inverter
+
+*.include "./and2_sckt.spice"
+* Use normal version gate or the weak pin-B version
+.include "./and2_weakB_sckt.spice"
+
+* keep this parameter to 0 when using the chain sub-circuit
+.param every_10gates_cap=0fF
+
+.include "./and2_chain_sckt.spice"
+
+VCC vcc 0 1.1V
+
+X1 1 vcc 3 vcc AND2C100A
+X2 vcc 2 4 vcc AND2C100B
+
+* add an inverter to each chain and loop back output
+M5 vcc 3 1 vcc p1 W=0.63u L=0.05u
+M6 1 3 0 0 n1 W=0.42u L=0.05u
+M7 vcc 4 2 vcc p1 W=0.63u L=0.05u
+M8 2 4 0 0 n1 W=0.42u L=0.05u
+
+.ic v(1) 0
+.ic v(2) 0
+
+.tran 0.01ns 50ns
+.save v(1) v(2) v(3) v(4)
+* observe v(1) v(2), each in its oscillation
+*.plot v(1) v(2)
+.end

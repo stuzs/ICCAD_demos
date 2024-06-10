@@ -1,0 +1,50 @@
+* Measure input capacitances of pinA, pinB of AND2 Gate
+* by measuring the integrals of input currents (charge Q)
+* The equivalent capacitance = Q / Vcc
+* The capacitance value seems to be of femto(10^(-15)) order
+
+* Choose either the normal or weal pin-B version
+.include "./and2_sckt.spice"
+*.include "./and2_weakB_sckt.spice"
+
+.param slope=0.2NS
+.param cap=10ff
+
+VCC vcc 0 1.1V
+VIN1 vin1 0 0 PULSE(0 1.1 2NS {slope} {slope} 20NS 40NS)
+VIN2 vin2 0 0 PULSE(0 1.1 2NS {slope} {slope} 20NS 40NS)
+* also add some source internal resistance
+Rin1 vin1 11 10
+Rin2 vin2 21 10
+
+*X1 for testing PIN A; node 11: input; out1: output
+X1 11 vcc out1 vcc AND2
+CL1 out1 0 {cap}
+
+*X2 for testing PIN B; node 21: input; out2: output
+X2 vcc 21 out2 vcc AND2
+CL2 out2 0 {cap}
+
+.tran 0.002ns 100ns
+
+* measure integrals of currents of input voltage sources
+.measure tran Q_pinA_r INTEG VIN1#branch from=40n to=50n
+.measure tran Q_pinB_r INTEG VIN2#branch from=40n to=50n
+
+.measure tran Q_pinA_f INTEG VIN1#branch from=60n to=70n
+.measure tran Q_pinB_f INTEG VIN2#branch from=60n to=70n
+
+* measured results of normal gate version are,
+* (might vary a little with other parameter settings)
+*q_pina_r = -2.21325e-15 from=  4.00000e-08 to=  5.00000e-08
+*q_pinb_r = -2.20588e-15 from=  4.00000e-08 to=  5.00000e-08
+*q_pina_f = 2.21331e-15 from=  6.00000e-08 to=  7.00000e-08
+*q_pinb_f = 2.20592e-15 from=  6.00000e-08 to=  7.00000e-08
+
+* measuerd results of weak pin-B gate version are,
+*q_pina_r = -2.21340e-15 from=  4.00000e-08 to=  5.00000e-08
+*q_pinb_r = -1.50988e-15 from=  4.00000e-08 to=  5.00000e-08
+*q_pina_f = 2.21346e-15 from=  6.00000e-08 to=  7.00000e-08
+*q_pinb_f = 1.50983e-15 from=  6.00000e-08 to=  7.00000e-08
+
+.end
