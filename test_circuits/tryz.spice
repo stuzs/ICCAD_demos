@@ -1,4 +1,5 @@
-* low pass filter
+* A low pass filter having z1 with changing impedance
+* Measure voltage(complex value) on node 2 
 r1 1 2 10
 r2 2 3 10
 r3 3 0 10

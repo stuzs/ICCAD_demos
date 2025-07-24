@@ -1,43 +1,44 @@
 #!/usr/bin/env python
-"""For demonstrating DC analysis of linear circuit using both
-Nodal Analysis(NA) and Modified Nodal Analysis(MNA) methods.
-NumPy is used for matrix operation.
+"""An IC simulation demo doing DC analysis of linear circuits using both
+Nodal Analysis(NA) and Modified Nodal Analysis(MNA) methods. Data
+structure types of class, set and dictionary as well as basic file I/O
+and error handling in Python are also demonstrated. NumPy is used for
+matrix operation.
 """
-
-# edited for github re-post in 03/27/2024
 
 import sys
 import numpy as np
 
 
-def isnotGround(node_name):
-    """Is the node_name not an alias of Ground?
-    """
-    return bool(node_name not in ('0', 'GND'))
+def isGround(nodeName):
+    """Return True if 'nodeName' is an alias of Ground."""
+    return nodeName in ('0', 'GND')
 
 
 class Component():
-    """Component is a class, which has 4 class members for
-       each circuit component: name, pNode, nNode and value
-       ---
-       + matrixFill() configures the nodal matrix for each component
+    """A class representing a device (component) in circuit, which
+    has 4 instance variables depicting each component instance:
+        - name, positiveNode, negativeNode and value.
+    Method matrixFill() configures nodal matrix for each component.
     """
 
     def __init__(self, name, positiveNode, negativeNode, value):
+        """Initialize a component instance by 4 depicting arguments."""
         self.name = name
         self.pNode = positiveNode
         self.nNode = negativeNode
         self.value = value
 
-    def matrixFill(self, matG, matB, vecI, vecE):
-        """Fill matrices matG and vecI, according to self's value.
-           If self is a voltage source, matB and vecE are filled.
+    def matrixFill(self, matG, matB, vecI, vecV):
+        """Fill matrices matG or vecI, according to component instance
+        variable 'value'; but if instance is a voltage source, both matB
+        and vecV are filled instead.
         """
-        # what if value is a complex number?
-        value = float(self.value)
+        # what if 'self.value' is a complex number?
+        instanceValue = float(self.value)
 
         # Why use 'try' here? Because '0' and GND' are not in nodeDict,
-        # and that will cause an error. Using try can avoid this error.
+        # and that will cause an error. Using try can handle such error.
         # Not good practice, but useful in showing try/except pair.
         try:
             nP = nodeDict[self.pNode]
@@ -50,35 +51,35 @@ class Component():
             pass
 
         if self.name.startswith('R'):  # Resistor handling
-            if isnotGround(self.pNode) and isnotGround(self.nNode):
-                matG[nP][nP] += 1 / value
-                matG[nN][nN] += 1 / value
-                matG[nP][nN] -= 1 / value
-                matG[nN][nP] -= 1 / value
-            elif isnotGround(self.pNode):
-                matG[nP][nP] += 1 / value
-            elif isnotGround(self.nNode):
-                matG[nN][nN] += 1 / value
+            if not isGround(self.pNode) and not isGround(self.nNode):
+                matG[nP][nP] += 1 / instanceValue
+                matG[nN][nN] += 1 / instanceValue
+                matG[nP][nN] -= 1 / instanceValue
+                matG[nN][nP] -= 1 / instanceValue
+            elif not isGround(self.pNode):
+                matG[nP][nP] += 1 / instanceValue
+            elif not isGround(self.nNode):
+                matG[nN][nN] += 1 / instanceValue
 
         if self.name.startswith('I'):  # Current source handling
-            if isnotGround(self.pNode):
-                vecI[nP][0] -= value
-            if isnotGround(self.nNode):
-                vecI[nN][0] += value
+            if not isGround(self.pNode):
+                vecI[nP][0] -= instanceValue
+            if not isGround(self.nNode):
+                vecI[nN][0] += instanceValue
 
         if self.name.startswith('V'):  # Voltage source handling
-            nV = int(vsrcDict[self.name])
-            vecE[nV][0] = value
-            if isnotGround(self.pNode):
+            nV = vsrcDict[self.name]
+            vecV[nV][0] = instanceValue
+            if not isGround(self.pNode):
                 matB[nP][nV] = 1
-            if isnotGround(self.nNode):
+            if not isGround(self.nNode):
                 matB[nN][nV] = -1
 
 
 # First, read in circuit file name in command line
 if len(sys.argv) > 1:
     netlistFile = sys.argv[1]
-    print("Input circuit file name for analyzing is: %s" % (netlistFile))
+    print("Input circuit file name for analyzing is: %s" % netlistFile)
 else:
     # use raw_input() in Python 2, but input() in Python 3
     netlistFile = input("Input circuit file name for analyzing: ")
@@ -86,13 +87,13 @@ else:
 with open(netlistFile) as netlist:
     # Second, create a component for each line, and store each
     # component into a list 'circuit', a holding place of all components.
-    # As in SPICE, node names are all case-insensitive! (upper for all)
+    # As in SPICE, node names are all case-insensitive (upper for all).
     circuit = []
     for line in netlist.readlines():
         # Parse the line into a word list
         wl = line.upper().strip().split()
-        # Create a Component from this line, and add it to circuit
-        # Ignore comments line, ignore line having less than 4 fields
+        # Create a Component by this line, and add it to 'circuit'.
+        # Ignore lines of comments, ignore lines of less than 4 fields.
         if len(wl) >= 4 and not wl[0].startswith(('*', '#')):
             circuit.append(Component(wl[0], wl[1], wl[2], wl[3]))
 
@@ -115,67 +116,64 @@ with open(netlistFile) as netlist:
         if comp.name.startswith('V'):
             vsrcSet.add(comp.name)
     # All node names are now stored in nodeSet
-    # All v-source names are now stored in vsrcSet
+    # All voltage source names are now stored in vsrcSet
 
-    # However, 0/GND are treated as the same node, not appearing in matrix
+    # 0/GND, treated as the same node, having no row/column in matrices
     if '0' in nodeSet:
         nodeSet.remove('0')
     if 'GND' in nodeSet:
         nodeSet.remove('GND')
 
     # Assign each node and v-source a unique number, beginning from 0
-    # The unique numbers are stored in two Dictionaries{}
-    # A list generated by a set is surely having unique members
+    # The unique numbers are stored in two dictionaries {}
+    # A list generated by a set is surely having unique elements
     nodeList = list(nodeSet)
     vsrcList = list(vsrcSet)
     nodeDict = {x: nodeList.index(x) for x in nodeList}
     vsrcDict = {x: vsrcList.index(x) for x in vsrcList}
 
     # Take a look to the name<->number mapping in dictionary?
-    #print(nodeDict)
-    #print(vsrcDict)
+    #print(nodeDict); print(vsrcDict)
 
     # Determine the dimensions N, M; i.e., how many nodes, v-sources?
     N = len(nodeDict)
     M = len(vsrcDict)
 
-    # Set the final matrix equation, based on NumPy matrix commands
-    #   G    B           VI
-    # [        ] [X] = [    ]
-    #   BT   D           VE
-    # where BT is the transpose of B
-    G = np.zeros([N, N])
-    D = np.zeros([M, M])
-    B = np.zeros([N, M])
-    vectorI = np.zeros([N, 1])
-    vectorE = np.zeros([M, 1])
+    # Set the final matrix equation, by using NumPy matrix commands
+    #   G    B           Isrc
+    # [        ] [X] = [     ]
+    #   C    D           Vsrc
+    # where C is the transpose of B, if no controlled source presented.
+    G = np.zeros((N, N))
+    D = np.zeros((M, M))
+    B = np.zeros((N, M))
+    vectorIsrc = np.zeros((N, 1))
+    vectorVsrc = np.zeros((M, 1))
     # And, what if we need all above matrices being complex?
     # NumPy supports complex number operations with such an ease
 
     # Now construct the nodal Matrix by looping over each component
     for comp in circuit:
-        comp.matrixFill(G, B, vectorI, vectorE)
+        comp.matrixFill(G, B, vectorIsrc, vectorVsrc)
 
     # Take a look to these matrices?
-    #print (G)
-    #print (B)
-    #print (vectorI)
-    #print (vectorE)
+    #print(G); print(B); print(vectorIsrc); print(vectorVsrc)
 
     if not usingMNA:  # Ordinary NA used
-        Result = np.dot(np.linalg.inv(G), vectorI)
+        Result = np.dot(np.linalg.inv(G), vectorIsrc)
     else:  # MNA must be used
         C = B.T
         A = np.vstack((np.hstack((G, B)), np.hstack((C, D))))
-        vectorZ = np.vstack((vectorI, vectorE))
-        Result = np.dot(np.linalg.inv(A), vectorZ)
+        vectorSupply = np.vstack((vectorIsrc, vectorVsrc))
+        Result = np.dot(np.linalg.inv(A), vectorSupply)
     # hstack()/vstack() are useful NumPy features
 
     # Output the result below. Would you try to sort them?
     for node in nodeDict.keys():
-        print("node %s: %.6fV" % (node, Result[nodeDict[node], 0]))
+        print("Voltage on %s: %.6fV" % (node, Result[nodeDict[node], 0]))
 
     if usingMNA:
         print("------")
         for vsrc in vsrcDict.keys():
-            print("vsource %s: %.6fA" % (vsrc, Result[vsrcDict[vsrc] + N, 0]))
+            print("Current on %s: %.6fA" % (
+                  vsrc, Result[vsrcDict[vsrc] + N, 0]))

@@ -1,0 +1,8 @@
+* Example circuit with a voltage source showing MNA
+rx 1 2 1
+ry 2 3 1
+rz 3 1 0.5
+rg 1 0 1
+ix 0 1 1
+iz 0 3 1
+v_add 1 3 0.2
