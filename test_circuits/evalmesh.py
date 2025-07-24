@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """The program reads in a binary image of metal jog, down-samples
 the image and discretizes the metal strip into a mesh of resistors.
-Then it calls a DC simulator to analyze mesh node voltages and
+Then it calls our DC simulator to analyze mesh node voltages and
 from the voltage outputs calculates current out-flowing from each node.
 A mesh voltage graph and a mesh current density graph are then plotted.
 """
@@ -59,7 +59,7 @@ print("* A right angle metal strip in mesh\n\
 print("Vin n_0_0 gnd 1", file=f)
 print("Vgnd n_%d_%d gnd 0" % (mesh_xsize-1, mesh_ysize-1), file=f)
 
-# generate resistors row by row horizontally then vertically.
+# generate resistors row by row, horizontally then vertically.
 # if a neighbor on next row is also 1, generate a vertical resistor between.
 # A fixed value 0.01-Ohm resistance is assumed tentatively.
 for j in range(mesh_ysize):
@@ -75,7 +75,7 @@ for j in range(mesh_ysize):
 # close the SPICE compatible netlist
 f.close()
 
-# run circuit simulator (SPICE) for all node voltages
+# run OUR circuit simulator (SPICE) for all node voltages
 ret_code = os.system("python ../iccad_mna.py resmesh.spice > meshvolt.out")
 if ret_code != 0:
     sys.exit(ret_code)
@@ -88,10 +88,10 @@ if ret_code != 0:
 meshVolt = numpy.zeros([mesh_ysize, mesh_xsize])
 with open("./meshvolt.out") as fmv:
     for line in fmv.readlines():
-        if re.match(r'^node N_\d+_\d+', line):
+        if re.match(r'^Voltage on N_\d+_\d+', line):
             node_args = re.split(' ', line)
-            nl = re.findall(r'\d+', node_args[1])
-            volt = re.search(r'[^V]+', node_args[2])
+            nl = re.findall(r'\d+', node_args[2])
+            volt = re.search(r'[^V]+', node_args[3])
             meshVolt[int(nl[1])][int(nl[0])] = volt.group()
 
 # 'with' automatically takes care of closing file after its block
