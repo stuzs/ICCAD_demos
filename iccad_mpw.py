@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """An IC fabrication demo showing MPW photomask and its projections on
 silicon wafer, with demos on Python code basics and using GUI in Python.
 """
