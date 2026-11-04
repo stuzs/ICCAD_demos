@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """An IC simulation demo doing DC analysis of linear circuits using both
 Nodal Analysis(NA) and Modified Nodal Analysis(MNA) methods. Data
 structure types of class, set and dictionary as well as basic file I/O
