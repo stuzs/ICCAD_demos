@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """For demonstrating the usage of Newton's Method (Newton Raphson Method)
 to solve DC operating point of a circuit with non-linear components.
 The only supported non-linear device here is a certain kind model of diode.
@@ -115,15 +115,15 @@ class Newton:
             print(*self.equ_diode_lines, sep="\n", file=f)
 
     def runMNAnalysis(self, finName, foutName):
-        return os.system("python iccad_mna.py %s > %s" % (finName, foutName))
+        return os.system("python3 iccad_mna.py %s > %s" % (finName, foutName))
 
     def readbackNodeResult(self, fName, node_volt_dic):
         with open(fName) as fout:
             for line in fout.readlines():
-                if re.match("^node .+", line):
+                if re.match("^Voltage on .+", line):
                     node_args = re.split(" ", line.replace("\n", ""))
-                    n_name = re.sub(":$", "", node_args[1])
-                    n_volt = re.sub("V$", "", node_args[2])
+                    n_name = re.sub(":$", "", node_args[2])
+                    n_volt = re.sub("V$", "", node_args[3])
                     node_volt_dic[n_name] = float(n_volt)  # save voltage
 
     def continueGuess(self):
