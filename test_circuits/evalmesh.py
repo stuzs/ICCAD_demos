@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """The program reads in a binary image of metal jog, down-samples
 the image and discretizes the metal strip into a mesh of resistors.
 Then it calls our DC simulator to analyze mesh node voltages and
@@ -76,7 +76,7 @@ for j in range(mesh_ysize):
 f.close()
 
 # run OUR circuit simulator (SPICE) for all node voltages
-ret_code = os.system("python ../iccad_mna.py resmesh.spice > meshvolt.out")
+ret_code = os.system("python3 ../iccad_mna.py resmesh.spice > meshvolt.out")
 if ret_code != 0:
     sys.exit(ret_code)
 
