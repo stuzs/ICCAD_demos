@@ -1,0 +1,11 @@
+** Imaginary YFET & other devices circuit
+Y1 1 2 0 YFET
+Rg 3 2 100
+Vg 3 0 2
+Id 0 4 0.1
+Rd 4 0 50
+D1 4 5 diode
+D2 5 6 diode
+Rload 6 7 10
+Vmeter 7 1 0
+Radj 5 2 300
