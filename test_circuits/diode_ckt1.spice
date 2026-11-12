@@ -1,0 +1,6 @@
+* non linear (diode) demo circuit
+r1 1 2 100
+r2 2 0 10000
+v1 1 0 5
+d 2 0 diode
+*dxc 2 gnd diode

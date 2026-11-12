@@ -1,0 +1,6 @@
+** Imaginary YFET test circuit
+Y1 1 2 0 YFET
+Ig 0 2 0.1
+Rg 2 0 10
+Id 0 1 0.5
+Rd 1 0 10

@@ -181,7 +181,7 @@ while True:
     littleNewton.readbackNodeResult(SPICE_out1, littleNewton.node_volt_iter1)
     iterNum += 1
     if littleNewton.judgeConverged():
-        print("Converged after", iterNum, "times. See result in", SPICE_out1)
+        print("Converged after", iterNum, "time(s). See result in", SPICE_out1)
         break
     if iterNum > 100:
         print("Not converged after too many iterations!")
