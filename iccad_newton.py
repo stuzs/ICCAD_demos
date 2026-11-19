@@ -36,12 +36,6 @@ class Newton:
     A Newton Iteration object who has iteration storages and
     calculation methods
     """
-    inputFileName = ""  # circuit file name
-    parseReady = False
-    found_diodes = []  # diode cards in the circuit
-    non_diode_lines = []  # all other cards in the circuit
-    equ_diode_lines = []  # linearly equivalent Geq and Ieq for diodes
-
     # initially guess all Vd = 1V
     # also try like Vd = 0, and compare the converging speeds
     init_diode_Vd = 1
@@ -50,14 +44,20 @@ class Newton:
     # current tolerance nor relative tolerance being considered here
     volt_tolerance = 1e-6
 
-    # node_volt_iter0 and node_volt_iter1 each saves the 1st and 2nd
-    # DC analysis node voltage result for any two consecutive iterations
-    node_volt_iter0 = {"0": 0,
-                       "GND": 0}
-    node_volt_iter1 = {"0": 0,
-                       "GND": 0}
-
     def __init__(self, fileName=""):
+        self.inputFileName = ""  # circuit file name
+        self.parseReady = False
+        self.found_diodes = []  # diode cards in the circuit
+        self.non_diode_lines = []  # all other cards in the circuit
+        self.equ_diode_lines = []  # linearly equivalent Geq and Ieq for diodes
+
+        # node_volt_iter0 and node_volt_iter1 each saves the 1st and 2nd
+        # DC analysis node voltage result for any two consecutive iterations
+        self.node_volt_iter0 = {"0": 0,
+                                "GND": 0}
+        self.node_volt_iter1 = {"0": 0,
+                                "GND": 0}
+
         self.parseReady = False
         if fileName:
             self.inputFileName = fileName
@@ -185,7 +185,7 @@ while True:
         break
     if iterNum > 100:
         print("Not converged after too many iterations!")
-        sys.exit(False)
+        sys.exit(1)
 
     # save this iteration's node voltage dictionary for next comparison
     littleNewton.node_volt_iter0 = littleNewton.node_volt_iter1.copy()

@@ -56,21 +56,11 @@ class Newton:
     A Newton Iteration object who has iteration storages and
     calculation methods
     """
-    inputFileName = ""  # circuit file name
-    parseReady = False
-    found_diodes = []  # diode cards in the circuit
-    equ_diode_lines = []  # linearly equivalent Geq and Ieq for diodes
-
-    found_yfets = []  # yfet cards in the circuit
-    equ_yfet_lines = []  # linearly equivalent Geq and Ieq for YFETs
-
-    non_diode_yfet_lines = []  # all other linear cards in the circuit
-
     # initially guess all Vd = 1V
     # also try like Vd = 0, and compare the converging speeds
     init_diode_Vd = 1
 
-    # initially guess all Vg = 0V, Vds = 0V
+    # initially guess all Vg = 0V, Vds = 0V for YFET
     init_yfet_Vg = 0
     init_yfet_Vds = 0
 
@@ -78,14 +68,24 @@ class Newton:
     # current tolerance nor relative tolerance being considered here
     volt_tolerance = 1e-6
 
-    # node_volt_iter0 and node_volt_iter1 each saves the 1st and 2nd
-    # DC analysis node voltage result for any two consecutive iterations
-    node_volt_iter0 = {"0": 0,
-                       "GND": 0}
-    node_volt_iter1 = {"0": 0,
-                       "GND": 0}
-
     def __init__(self, fileName=""):
+        self.inputFileName = ""  # circuit file name
+        self.parseReady = False
+        self.found_diodes = []  # diode cards in the circuit
+        self.equ_diode_lines = []  # linearly equivalent Geq and Ieq for diodes
+
+        self.found_yfets = []  # yfet cards in the circuit
+        self.equ_yfet_lines = []  # linearly equivalent Geq and Ieq for YFETs
+
+        self.non_diode_yfet_lines = []  # all other linear cards in the circuit
+
+        # node_volt_iter0 and node_volt_iter1 each saves the 1st and 2nd
+        # DC analysis node voltage result for any two consecutive iterations
+        self.node_volt_iter0 = {"0": 0,
+                                "GND": 0}
+        self.node_volt_iter1 = {"0": 0,
+                                "GND": 0}
+
         self.parseReady = False
         if fileName:
             self.inputFileName = fileName
@@ -169,7 +169,7 @@ class Newton:
     def continueGuess(self):
         if self.parseReady is not True:
             return
-        # apply all diodes's Vd from Iter0 dictionary
+        # apply all diodes' Vd's from Iter0 dictionary
         self.equ_diode_lines = []
         for (dname, dnode1, dnode2) in self.found_diodes:
             v1 = self.node_volt_iter0[dnode1]
@@ -235,11 +235,11 @@ while True:
     littleNewton.readbackNodeResult(SPICE_out1, littleNewton.node_volt_iter1)
     iterNum += 1
     if littleNewton.judgeConverged():
-        print("Converged after", iterNum, "times. See result in", SPICE_out1)
+        print("Converged after", iterNum, "time(s). See result in", SPICE_out1)
         break
     if iterNum > 100:
         print("Not converged after too many iterations!")
-        sys.exit(False)
+        sys.exit(1)
 
     # save this iteration's node voltage dictionary for next comparison
     littleNewton.node_volt_iter0 = littleNewton.node_volt_iter1.copy()
